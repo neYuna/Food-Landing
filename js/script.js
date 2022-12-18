@@ -93,49 +93,95 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const modalTrigger = document.querySelectorAll("[data-modal]"),
     modal = document.querySelector(".modal");
-  modalClose = document.querySelector("[data-close]");
 
-  function moveModal() {
-    modal.classList.toggle("show");
-    if (modal.classList.contains("show")) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+  modalTrigger.forEach((btn) => {
+    btn.addEventListener("click", openModal);
+  });
 
+  function closeModal() {
+    modal.classList.add("hide");
+    modal.classList.remove("show");
+    document.body.style.overflow = "";
+  }
+
+  function openModal() {
+    modal.classList.add("show");
+    modal.classList.remove("hide");
+    document.body.style.overflow = "hidden";
     clearInterval(modalTimerId);
   }
 
-  modalTrigger.forEach((btn) => {
-    btn.addEventListener("click", moveModal);
-  });
-
-  modal.addEventListener("click", (event) => {
-    if (event.target === modal) {
-      moveModal();
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal || e.target.getAttribute("data-close") == "") {
+      closeModal();
     }
   });
 
-  modalClose.addEventListener("click", moveModal);
   document.addEventListener("keydown", (e) => {
     if (e.code === "Escape" && modal.classList.contains("show")) {
-      moveModal();
+      closeModal();
     }
   });
 
-  // const modalTimerId = setTimeout(moveModal, 5000);
+  const modalTimerId = setTimeout(openModal, 300000);
+  // Изменил значение, чтобы не отвлекало
 
   function showModalByScroll() {
     if (
       window.pageYOffset + document.documentElement.clientHeight >=
       document.documentElement.scrollHeight
     ) {
-      moveModal();
+      openModal();
       window.removeEventListener("scroll", showModalByScroll);
     }
   }
-
   window.addEventListener("scroll", showModalByScroll);
+
+  // const modalTrigger = document.querySelectorAll("[data-modal]"),
+  //   modal = document.querySelector(".modal");
+  // modalClose = document.querySelector("[data-close]");
+
+  // function moveModal() {
+  //   modal.classList.toggle("show");
+  //   if (modal.classList.contains("show")) {
+  //     document.body.style.overflow = "hidden";
+  //   } else {
+  //     document.body.style.overflow = "";
+  //   }
+
+  //   // clearInterval(modalTimerId);
+  // }
+
+  // modalTrigger.forEach((btn) => {
+  //   btn.addEventListener("click", moveModal);
+  // });
+
+  // modal.addEventListener("click", (event) => {
+  //   if (event.target === modal) {
+  //     moveModal();
+  //   }
+  // });
+
+  // modalClose.addEventListener("click", moveModal);
+  // document.addEventListener("keydown", (e) => {
+  //   if (e.code === "Escape" && modal.classList.contains("show")) {
+  //     moveModal();
+  //   }
+  // });
+
+  // const modalTimerId = setTimeout(moveModal, 5000);
+
+  // function showModalByScroll() {
+  //   if (
+  //     window.pageYOffset + document.documentElement.clientHeight >=
+  //     document.documentElement.scrollHeight
+  //   ) {
+  //     moveModal();
+  //     window.removeEventListener("scroll", showModalByScroll);
+  //   }
+  // }
+
+  // window.addEventListener("scroll", showModalByScroll);
 
   //Используем классы для карточек
 
@@ -225,4 +271,72 @@ window.addEventListener("DOMContentLoaded", () => {
     ".menu .container",
     ".menu__item"
   ).render();
+
+  //Отправка данных с форм fetch
+
+  const forms = document.querySelectorAll("form");
+  const message = {
+    loading: "Загрузка...",
+    success: "Спасибо! Скоро мы с вами свяжемся",
+    failure: "Что-то пошло не так...",
+  };
+
+  forms.forEach((item) => {
+    postData(item);
+  });
+
+  function postData(form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      const object = {};
+      formData.forEach(function (value, key) {
+        object[key] = value;
+      });
+
+      fetch("server.php", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(object),
+      })
+        .then((data) => data.text())
+        .then((data) => {
+          console.log(data);
+          showThanksModal(message.success);
+          form.reset();
+        })
+        .catch(() => {
+          showThanksModal(message.failure);
+        })
+        .finally(() => {
+          form.reset();
+        });
+    });
+  }
+
+  function showThanksModal(message) {
+    const prevModalDialog = document.querySelector(".modal__dialog");
+
+    prevModalDialog.classList.add("hide");
+    openModal();
+
+    const thanksModal = document.createElement("div");
+    thanksModal.classList.add("modal__dialog");
+    thanksModal.innerHTML = `
+        <div class="modal__content">
+            <div class="modal__close" data-close>×</div>
+            <div class="modal__title">${message}</div>
+        </div>
+    `;
+    document.querySelector(".modal").append(thanksModal);
+    setTimeout(() => {
+      thanksModal.remove();
+      prevModalDialog.classList.add("show");
+      prevModalDialog.classList.remove("hide");
+      closeModal();
+    }, 4000);
+  }
 });

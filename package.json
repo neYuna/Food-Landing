@@ -1,0 +1,23 @@
+{
+  "name": "food-landing",
+  "version": "1.0.0",
+  "description": "'simple vanilla js project'",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neYuna/Food-Landing.git"
+  },
+  "author": "yuna",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/neYuna/Food-Landing/issues"
+  },
+  "homepage": "https://github.com/neYuna/Food-Landing#readme",
+  "devDependencies": {
+    "json": "^11.0.0",
+    "server": "^1.0.38"
+  }
+}
